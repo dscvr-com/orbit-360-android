@@ -5,23 +5,43 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * This class allows asynchronous execution of multiple commands, in order. It also provides basic
+ * estimation of the position of the Orbit360's arm.
+ *
+ * If you use this class, you should not call methods of the passed Orbit360Control instance directly.
+ * Also, you should not use two ScriptRunner instances on the same Orbit360Control instance simultaneously.
+ *
+ * The position estimation is always relative to the initial position, when the ScriptRunner instance
+ * was created.
+ */
 public class ScriptRunner {
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Future<?> lastSubmittedScript = null;
-    private MotorControl control;
+    private Orbit360Control control;
     private long currentStartTime;
     private Point2f currentMovement;
     private Point2f currentSpeed;
     private Point2f position;
 
-    public ScriptRunner(MotorControl control) {
+    /**
+     * Creates a new instance of this class.
+     * @param control The connected Orbit360Control instance.
+     */
+    public ScriptRunner(Orbit360Control control) {
         this.control = control;
         this.position = new Point2f(0, 0);
         this.currentSpeed = new Point2f(0, 0);
         this.currentMovement = new Point2f(0, 0);
     }
 
+    /**
+     * Executes a list of commands, in order. If this method is called while another execution is
+     * still in progress, it will raise an exception.
+     * @param commands The commands to execute.
+     * @param handler The callback to call when execution is finished.
+     */
     public void runScript(List<Command> commands, ExecutionFinishedHandler handler) {
         if (lastSubmittedScript == null || lastSubmittedScript.isDone())
             lastSubmittedScript = executor.submit(new CommandWorkerRunnable(commands, handler));
@@ -30,12 +50,18 @@ public class ScriptRunner {
         }
     }
 
+    /**
+     * @return The estimated position of the arm in steps.
+     */
     public Point2f getPositionSteps() {
         return new Point2f(getXPositionSteps(), getYPositionSteps());
     }
 
+    /**
+     * @return The estimated position of the arm in degrees.
+     */
     public Point2f getPosition() {
-        return new Point2f(getXPositionSteps(), getYPositionSteps()).div(MotorControl.DEGREES_TO_STEPS);
+        return new Point2f(getXPositionSteps(), getYPositionSteps()).div(Orbit360Control.DEGREES_TO_STEPS);
     }
 
     private float getXPositionSteps() {
@@ -46,11 +72,22 @@ public class ScriptRunner {
         return (float)(position.getY() + Math.signum(currentMovement.getY()) * Math.min(Math.abs(currentMovement.getY()), currentSpeed.getY() * (System.currentTimeMillis() - currentStartTime) / 1000.0));
     }
 
+    /**
+     * Cancels execution after the current command in the queue has finished.
+     * The estimated position will still be consistent.
+     */
     public void abort() {
         lastSubmittedScript.cancel(true);
     }
 
+    /**
+     * Interface for the callback which is called upon finished execution.
+     */
     public interface ExecutionFinishedHandler {
+        /**
+         * @param commands The list of command which was executed.
+         * @param sender The script runner which invoked the callback.
+         */
         void commandExecutionFinished(List<Command> commands, ScriptRunner sender);
     }
 
@@ -87,7 +124,5 @@ public class ScriptRunner {
                 e.printStackTrace();
             }
         }
-
-
     }
 }

@@ -3,7 +3,7 @@ package com.dscvr.orbit360sdk;
 import java.nio.ByteBuffer;
 
 /**
- * Created by Charlotte on 17.11.2016.
+ * This class represents a single command, which can be sent to the Orbit360.
  */
 public class Command {
     private static final byte[] EMPTY = new byte[0];
@@ -17,18 +17,36 @@ public class Command {
         this.speed = speed;
     }
 
+    /**
+     * @return The speed, in steps per second, for this command.
+     */
     public Point2f getSpeed() {
         return speed;
     }
 
+    /**
+     * @return The steps to move for thi scommand.
+     */
     public Point2f getSteps() {
         return steps;
     }
 
+    /**
+     * Creates a new command from horizontal (X) and vertical (Y) movement, in degrees.
+     * @param degrees The distance to move, in degrees.
+     * @param speedInDegrees The movement speed, in degrees per second.
+     * @return The command, which can be sent to the Orbit360.
+     */
     public static Command moveXY(Point2f degrees, Point2f speedInDegrees) {
-        return moveXYSteps(degrees.mul(MotorControl.DEGREES_TO_STEPS), speedInDegrees.mul(MotorControl.DEGREES_TO_STEPS));
+        return moveXYSteps(degrees.mul(Orbit360Control.DEGREES_TO_STEPS), speedInDegrees.mul(Orbit360Control.DEGREES_TO_STEPS));
     }
 
+    /**
+     * Creates a new command from horizontal (X) and vertical (Y) movement, in steps.
+     * @param steps The distance to move, in steps.
+     * @param speed The movement speed, in steps per second.
+     * @return The command, which can be sent to the Orbit360.
+     */
     public static Command moveXYSteps(Point2f steps, Point2f speed) {
         Command command = new Command(steps, speed);
         byte[] dataX = command.createDataWithoutFullStep((int) steps.getX(), (int) speed.getX());
@@ -39,6 +57,10 @@ public class Command {
         return command;
     }
 
+    /**
+     * Creates a stop-command, which, if sent, will cause the Orbit360 to cease movement.
+     * @return The command, which can be sent to the Orbit360.
+     */
     public static Command stop() {
         Command command = new Command(new Point2f(0, 0), new Point2f(0, 0));
         command.createCommand((byte) 0x04, EMPTY);
@@ -99,6 +121,9 @@ public class Command {
         return ByteBuffer.allocate(4).putInt(value).array();
     }
 
+    /**
+     * @return The command's byte representation.
+     */
     public byte[] getValue() {
         return value;
     }

@@ -17,16 +17,21 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Created by emi on 21/08/2017.
+ * This class wraps the Android Bluetooth API and helps with discovering a nearby Orbit360.
  */
-
-public class MotorDiscovery {
+public class Orbit360Discovery {
+    /**
+     * The serivce UUID of the Orbit360
+     */
     public static final ParcelUuid SERVICE_UUID = ParcelUuid.fromString("69400001-B5A3-F393-E0A9-E50E24DCCA99");
+    /**
+     * The characteristic UUID of the Orbit360's movement characteristic.
+     */
     public static final UUID CHARACTERISTIC_UUID = UUID.fromString("69400002-B5A3-F393-E0A9-E50E24DCCA99");
 
     private final BluetoothAdapter adapter;
     private final Handler stopScanHandler;
-    private MotorListener listener;
+    private Orbit360Listener listener;
     private List<BluetoothDevice> knownDevices;
     private BluetoothLeScanCallback bluetoothScanCallback;
     private boolean currentlyConnecting = false;
@@ -58,7 +63,14 @@ public class MotorDiscovery {
         void deviceFound(BluetoothDevice device);
     }
 
-    public MotorDiscovery(BluetoothAdapter adapter, MotorListener listener, Context context)
+    /**
+     * Creates a new instance of this class.
+     * @param adapter The bluetooth adapter to use for discovery.
+     * @param listener The listener which contains the callbacks called when the Orbit360 is connected
+     *                 or a button on the remote is pressed.
+     * @param context The application context.
+     */
+    public Orbit360Discovery(BluetoothAdapter adapter, Orbit360Listener listener, Context context)
     {
         this.adapter = adapter;
         this.listener = listener;
@@ -73,9 +85,13 @@ public class MotorDiscovery {
         });
     }
 
+    /**
+     * Begin connecting.
+     * On success, callback passed to the constructor of this instance is called.
+     */
     public void connect() {
         if (adapter == null || !adapter.isEnabled() && adapter.getBluetoothLeScanner() == null) {
-            throw new MotorDiscoveryException("Bluetooth is not enabled");
+            throw new Orbit360DiscoveryException("Bluetooth is not enabled");
         }
         List<BluetoothDevice> bluetoothDevices = searchCoupledDevices();
         if (bluetoothDevices.size() > 0) {
