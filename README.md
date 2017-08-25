@@ -18,7 +18,7 @@ The SDK contains the following classes to develop custom applications using the 
 
 ### Usage Example
 
-This is a minimal, illustrative usage example. For a complete usage example see the full example [here](https://github.com/dscvr.com/orbit-360-android-example).
+This is a minimal, illustrative usage example. For a complete usage example see the full example [here](https://github.com/dscvr.com/orbit-360-android-sdk-example).
 
 The first step is to create a listener, which receives the connection to the Orbit360:
 
