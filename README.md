@@ -22,7 +22,7 @@ This is a minimal, illustrative usage example. For a complete usage example see 
 
 The first step is to create a listener, which receives the connection to the Orbit360:
 
-```
+```java
 Orbit360Control orbit360;
 Orbit360ConnectedListener onOrbit360Connected = new Orbit360ConnectedListener() {
     @Override
@@ -34,7 +34,7 @@ Orbit360ConnectedListener onOrbit360Connected = new Orbit360ConnectedListener() 
 
 Then, initialize the Bluetooth adapter and start looking for an Orbit360 closeby. Don't forget to handle Android's permission system correctly!
 
-```
+```java
 Orbit360Discovery discovery = new Orbit360Discovery(
 	BluetoothAdapter.getDefaultAdapter(),
     new Orbit360Listener(onOrbit360Connected),
@@ -45,7 +45,7 @@ discovery.connect();
 
 When an Orbit360 is found and connected, the callback above will be called. You can start controlling the Orbit360!
 
-```
+```java
 // Move the Orbit360 180 degrees counterclockwise around the X-axis!
 orbit360.moveXY(new Point2f(-180, 0), new Point2f(150, 150)) 
 ```
